@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>NoNotebook</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ====== Directory View ====== -->
+<div id="dir-view" class="view active">
+  <div id="dir-zoom">
+    <div class="dir-header">目 录</div>
+    <div id="chapter-list"></div>
+    <div id="dir-add" class="add-btn">+</div>
+  </div>
+</div>
+
+<!-- ====== Paper View ====== -->
+<div id="paper-view" class="view">
+  <div id="paper-viewport">
+    <div id="paper-zoom">
+      <div id="page-strip"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== Context Menu ====== -->
+<div id="ctx-menu" class="ctx-menu hidden"></div>
+
+<!-- ====== Confirm Dialog ====== -->
+<div id="confirm-bg" class="confirm-bg hidden">
+  <div class="confirm-box">
+    <p id="confirm-msg"></p>
+    <div class="confirm-actions">
+      <button id="confirm-no">取消</button>
+      <button id="confirm-yes" class="danger">确定删除</button>
+    </div>
+  </div>
+</div>
+
+<script src="renderer.js"></script>
+</body>
+</html>

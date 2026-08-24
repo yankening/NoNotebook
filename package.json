@@ -1,0 +1,15 @@
+{
+  "name": "no-notebook",
+  "version": "1.0.0",
+  "description": "A digital paper notebook — minimal, distraction-free writing experience. Chapters are folders, pages are paper sheets. Pure text, local storage, no cloud.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": ["notebook", "writing", "paper", "minimal", "electron", "offline"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^26.6.10"
+  }
+}
