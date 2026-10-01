@@ -1,24 +1,14 @@
-# Dependencies
 node_modules/
-
-# Electron build output
 dist/
 out/
-
-# OS files
+test-results/
 .DS_Store
 Thumbs.db
 desktop.ini
-
-# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# Env
 .env
 .env.local
-
-# Debug logs
 npm-debug.log*

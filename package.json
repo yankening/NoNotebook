@@ -1,15 +1,31 @@
 {
   "name": "no-notebook",
-  "version": "1.0.0",
-  "description": "A digital paper notebook — minimal, distraction-free writing experience. Chapters are folders, pages are paper sheets. Pure text, local storage, no cloud.",
+  "version": "1.1.0",
+  "description": "Local plain-text notes on a movable paper desktop.",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "test": "node --test tests/storage.test.cjs tests/canvas.test.cjs",
+    "test:ui": "node --test tests/ui.test.cjs"
   },
-  "keywords": ["notebook", "writing", "paper", "minimal", "electron", "offline"],
-  "author": "",
+  "keywords": [
+    "notebook",
+    "writing",
+    "paper",
+    "minimal",
+    "electron",
+    "offline"
+  ],
   "license": "MIT",
   "devDependencies": {
     "electron": "^26.6.10"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yankening/NoNotebook.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yankening/NoNotebook/issues"
+  },
+  "homepage": "https://github.com/yankening/NoNotebook#readme"
 }

@@ -6,39 +6,50 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- ====== Directory View ====== -->
-<div id="dir-view" class="view active">
-  <div id="dir-zoom">
-    <div class="dir-header">目 录</div>
-    <div id="chapter-list"></div>
-    <div id="dir-add" class="add-btn">+</div>
-  </div>
-</div>
-
-<!-- ====== Paper View ====== -->
-<div id="paper-view" class="view">
-  <div id="paper-viewport">
-    <div id="paper-zoom">
-      <div id="page-strip"></div>
+  <div id="dir-view" class="view active">
+    <div id="dir-zoom">
+      <div class="dir-header">目 录</div>
+      <div id="chapter-list"></div>
+      <button id="dir-add" class="add-btn" type="button" aria-label="新建章节" disabled>+</button>
     </div>
   </div>
-</div>
 
-<!-- ====== Context Menu ====== -->
-<div id="ctx-menu" class="ctx-menu hidden"></div>
-
-<!-- ====== Confirm Dialog ====== -->
-<div id="confirm-bg" class="confirm-bg hidden">
-  <div class="confirm-box">
-    <p id="confirm-msg"></p>
-    <div class="confirm-actions">
-      <button id="confirm-no">取消</button>
-      <button id="confirm-yes" class="danger">确定删除</button>
+  <div id="paper-view" class="view">
+    <nav class="paper-toolbar" aria-label="桌面操作">
+      <button id="back-to-dir" type="button" title="返回目录 (Esc)">← 目录</button>
+      <span class="canvas-hint">双指移动 · 捏合缩放</span>
+      <div class="canvas-controls">
+        <span id="page-counter" aria-live="polite">1 / 1</span>
+        <button id="zoom-readout" type="button" title="恢复 100% (Ctrl + 0)">100%</button>
+        <button id="fit-canvas" type="button" title="查看全部纸张 (Ctrl + Shift + 0)">全局</button>
+        <button id="add-page" type="button" title="新建纸张 (Ctrl + N)">+ 纸张</button>
+      </div>
+    </nav>
+    <div id="paper-viewport" tabindex="0" aria-label="纸张桌面，可自由移动和缩放">
+      <div id="canvas-world">
+        <div id="paper-grid"></div>
+      </div>
     </div>
   </div>
-</div>
 
-<script src="renderer.js"></script>
+  <div id="ctx-menu" class="ctx-menu hidden" role="menu"></div>
+
+  <div id="confirm-bg" class="confirm-bg hidden">
+    <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="confirm-msg">
+      <p id="confirm-msg"></p>
+      <div class="confirm-actions">
+        <button id="confirm-no" type="button">取消</button>
+        <button id="confirm-yes" class="danger" type="button">确定删除</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="save-status" class="save-status" role="status" aria-live="polite" hidden>
+    <span id="save-message"></span>
+    <button id="save-retry" type="button" hidden>重试保存</button>
+  </div>
+
+  <script src="canvas.js"></script>
+  <script src="renderer.js"></script>
 </body>
 </html>

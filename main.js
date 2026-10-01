@@ -1,59 +1,11 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
-const fs = require('fs')
+const { createNotebookStore } = require('./storage')
 
-// ── Storage ──────────────────────────────────────────────
 const DATA_PATH = path.join(app.getPath('userData'), 'notebook.json')
+const store = createNotebookStore(DATA_PATH)
+let mainWindow = null
 
-function defaultNotebook() {
-  return {
-    version: 1,
-    chapters: [
-      {
-        id: 'ch-' + Date.now().toString(36),
-        title: '我的笔记',
-        pages: [defaultPage()]
-      }
-    ]
-  }
-}
-
-function defaultPage() {
-  return {
-    id: 'pg-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
-    content: '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-}
-
-function readNotebook() {
-  try {
-    if (!fs.existsSync(DATA_PATH)) {
-      const nb = defaultNotebook()
-      writeNotebook(nb)
-      return nb
-    }
-    return JSON.parse(fs.readFileSync(DATA_PATH, 'utf-8'))
-  } catch (e) {
-    console.error('Read error:', e)
-    return defaultNotebook()
-  }
-}
-
-function writeNotebook(data) {
-  try {
-    const dir = path.dirname(DATA_PATH)
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-    fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2), 'utf-8')
-    return true
-  } catch (e) {
-    console.error('Write error:', e)
-    return false
-  }
-}
-
-// ── Window ───────────────────────────────────────────────
 function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
@@ -68,17 +20,70 @@ function createWindow() {
     }
   })
 
+  mainWindow = win
+  let allowClose = false
+  let closing = false
+  let rendererReady = false
+
+  win.webContents.on('did-finish-load', () => { rendererReady = true })
+  win.webContents.on('did-start-loading', () => { rendererReady = false; closing = false })
+  win.webContents.on('render-process-gone', () => { rendererReady = false; closing = false })
+  win.on('close', event => {
+    if (allowClose || !rendererReady) return
+    event.preventDefault()
+    if (closing) return
+    closing = true
+    win.webContents.send('prepare-close')
+  })
+
+  const finishClose = event => {
+    if (event.sender !== win.webContents || !closing) return
+    allowClose = true
+    win.close()
+  }
+  const cancelClose = event => {
+    if (event.sender === win.webContents) closing = false
+  }
+  ipcMain.on('close-ready', finishClose)
+  ipcMain.on('close-cancelled', cancelClose)
+  win.on('closed', () => {
+    ipcMain.removeListener('close-ready', finishClose)
+    ipcMain.removeListener('close-cancelled', cancelClose)
+    if (mainWindow === win) mainWindow = null
+  })
+
   win.setMenuBarVisibility(false)
-  win.loadFile('index.html')
+  win.loadFile(path.join(__dirname, 'index.html'))
 }
 
-// ── IPC ──────────────────────────────────────────────────
-ipcMain.handle('get-notebook', () => readNotebook())
-ipcMain.handle('save-notebook', (_e, data) => writeNotebook(data))
+if (!app.requestSingleInstanceLock()) {
+  app.quit()
+} else {
+  // A second launch focuses the existing window instead of creating a second writer.
+  app.on('second-instance', () => {
+    if (!mainWindow) return
+    if (mainWindow.isMinimized()) mainWindow.restore()
+    mainWindow.focus()
+  })
 
-// ── Start ────────────────────────────────────────────────
-app.whenReady().then(createWindow)
+  ipcMain.handle('get-notebook', () => store.read())
+  ipcMain.handle('save-notebook', async (_event, data) => {
+    try {
+      return await store.write(data)
+    } catch (error) {
+      console.error('Write error:', error)
+      return false
+    }
+  })
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
-})
+  app.whenReady().then(() => {
+    createWindow()
+    app.on('activate', () => {
+      if (!mainWindow) createWindow()
+    })
+  })
+
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit()
+  })
+}
