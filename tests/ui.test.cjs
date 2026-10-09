@@ -31,5 +31,5 @@ test('Electron interaction and close-save checks use an isolated notebook', { ti
   const code = await completed
   t.diagnostic(output.trim())
   assert.equal(code, 0, output)
-  assert.match(output, /All 19 interaction checks passed/)
+  assert.match(output, /All 23 interaction checks passed/)
 })

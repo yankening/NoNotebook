@@ -33,6 +33,7 @@ let savedRevision = 0
 let savePromise = null
 let statusTimer = null
 let closing = false
+let reloading = false
 let confirmFocus = null
 let renderFrame = null
 let contextFocus = null
@@ -97,6 +98,22 @@ function saveNow() {
 }
 
 saveRetry.addEventListener('click', saveNow)
+window.addEventListener('beforeunload', e => {
+  document.activeElement?.blur()
+  if (!notebook || savedRevision === editRevision) return
+  e.preventDefault()
+  e.returnValue = false
+  if (closing || reloading) return
+  reloading = true
+  document.body.inert = true
+  saveNow().then(saved => {
+    reloading = false
+    if (closing) return
+    document.body.inert = false
+    if (saved) window.location.reload()
+    else saveRetry.focus()
+  })
+})
 window.api.onBeforeClose(async () => {
   if (closing) return
   closing = true
@@ -527,7 +544,7 @@ document.addEventListener('keydown', e => {
 
   if (!e.ctrlKey && !e.metaKey) return
 
-  switch (e.key) {
+  switch (e.code === 'Digit0' ? '0' : e.key) {
     case 'ArrowLeft':
     case 'ArrowRight':
       if (!paperView.classList.contains('active')) break
@@ -667,7 +684,13 @@ document.addEventListener('click', e => { if (!ctxMenu.contains(e.target)) hideC
 async function init() {
   dirAdd.disabled = true
   try {
-    notebook = await window.api.getNotebook()
+    // Font metrics affect line wrapping and paper height.
+    const [loadedNotebook] = await Promise.all([
+      window.api.getNotebook(),
+      document.fonts.load('400 16px "Source Han Sans CN"', '中文笔记 NoNotebook')
+        .catch(error => console.warn('Font load failed:', error))
+    ])
+    notebook = loadedNotebook
     applyDirZoom()
     requestCanvasRender()
     renderDir()

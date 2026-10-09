@@ -27,6 +27,7 @@ function createWindow() {
 
   win.webContents.on('did-finish-load', () => { rendererReady = true })
   win.webContents.on('did-start-loading', () => { rendererReady = false; closing = false })
+  win.webContents.on('will-prevent-unload', () => { rendererReady = true })
   win.webContents.on('render-process-gone', () => { rendererReady = false; closing = false })
   win.on('close', event => {
     if (allowClose || !rendererReady) return
